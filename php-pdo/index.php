@@ -1,3 +1,16 @@
+<?php
+ try
+    {
+	  // On se connecte à MySQL
+	    $bdd = new PDO('mysql:host=localhost;dbname=weatherapp;charset=utf8', 'root', '');
+    }
+    catch(Exception $e)
+    {
+	    // En cas d'erreur, on affiche un message et on arrête tout
+        die('Erreur : '.$e->getMessage());
+    }
+  ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,58 +21,45 @@
 </head>
 <body>
   <h1>Les températures du jour (minima et maxima) pour des villes belges.</h1>
-  <?php
-    try
-    {
-	  // On se connecte à MySQL
-	    $bdd = new PDO('mysql:host=localhost;dbname=weatherapp;charset=utf8', 'root', '');
-    }
-    catch(Exception $e)
-    {
-	    // En cas d'erreur, on affiche un message et on arrête tout
-        die('Erreur : '.$e->getMessage());
-    }
-    $result = $bdd->query('SELECT * FROM meteo');
-      // $donnees = $result->fetch();
-      // print_r($donnees);
-    echo '<form action="" method="POST">';
-      echo '<table border="1">';
-      echo '<thead>';
-        echo '<tr>';
-          echo '<th> ';
-          echo '</th>';
-          echo '<th> Ville';
-          echo '</th>';
-          echo '<th> Max';
-          echo '</th>';
-          echo '<th> Min';
-          echo '</th>';
 
-        echo '</tr>';
-      echo '</thead>';
-      echo '<tbody>';
-      while ($donnees = $result->fetch()) {
-        echo '<tr>';
-        echo "<td> <input type='checkbox' name='deleteId[]' value='checkbox'></td>";       
-        echo "<td>{$donnees['ville']}</td>";
-        echo "<td>{$donnees['haut']}</td>";
-        echo "<td>{$donnees['bas']}</td>" ;
-        echo '</tr>';
-      }
-      echo '</tbody>';
-      echo '</table>';
-      echo '<input type="submit" name="submit" value="Supprimer les villes"';
-    echo '</form>';
-    
-    if(isset($_POST['deleteId'])){
-        foreach($_POST['deleteId'] as $value) {
-          echo "Ville coisie : ".$value.'<br/>';
-        }
-        // $sql = 'DELETE FROM meteo WHERE id IN ('.implode(',', $_POST['deleteId']).')';
-      } else echo "Non";
-    
-     $result->closeCursor();
+  <?php
+   //réalisation requete
+    $result = $bdd->query('SELECT * FROM meteo');
   ?>
+  <!-- Creation tableau -->
+    <form action="" method="POST">
+      <table border="1">
+        <thead>
+          <tr>
+            <th></th>
+            <th> Ville</th>
+            <th> Max</th>
+            <th> Min</th>
+          </tr>
+        </thead>
+        <tbody>
+        <?php while ($donnees = $result->fetch()) : ?>
+        <tr>
+          <td><input type="checkbox" name="cityDel[]" value=<?php echo $donnees['ville'];?>></td>       
+          <td> <?php echo ($donnees['ville']); ?></td>
+          <td><?php echo ($donnees['haut']); ?></td>
+          <td><?php echo ($donnees['bas']); ?></td>
+        </tr>
+        <?php endwhile;
+        $result->closeCursor();
+        ?>
+        </tbody>
+      </table>
+      <?php
+      if(isset($_POST['cityDel'])){
+        foreach($_POST['cityDel'] as $value) {
+         $deleteCity = $bdd->prepare('DELETE FROM meteo WHERE ville = :ville');
+         $deleteCity->execute(['ville' => $value]);
+        }
+      }
+      ?>
+      <input type="submit" name="submit" value="Supprimer les villes">
+    </form>
 
 <h2>Ajouter d'autres villes</h2>
 <form method="POST" action="">
@@ -73,21 +73,22 @@
 </form>
 
 <?php
-  
-	if (isset($_POST['ville'], $_POST['max'], $_POST['min'])) {
-		 $sqlQuery = 'INSERT INTO meteo(ville, haut, bas) VALUES (:ville, :haut, :bas)';
+  $ville = isset($_POST['ville']) ? $_POST['ville'] : 'Une ville est requise';
+  $haut = isset($_POST['max']) ? $_POST['max'] : 'Une temperature max est requise';
+  $bas = isset($_POST['min']) ? $_POST['min'] : 'Une temperature min est requise';
+  //requete 
+	$sqlQuery = 'INSERT INTO meteo(ville, haut, bas) VALUES (:ville, :haut, :bas)';
     //preparation
-    $insertVille = $bdd->prepare($sqlQuery);
-    //Execution. La ville en base de données
-    $insertVille->execute([
-      'ville' => $_POST['ville'],
-      'haut' => $_POST['max'],
-      'bas' => $_POST['min'],
-    ]);
-    $insertVille->closeCursor();		
-	} else echo('Erreur  ');
-
-  // header("Location:/sql/php-pdo/index.php");
+  $insertVille = $bdd->prepare($sqlQuery);
+  //Execution. La ville en base de données
+  $insertVille->execute([
+      'ville' => $ville,
+      'haut' => $haut,
+      'bas' => $bas,
+    ]) or die();
+    		
+	header("Location:/sql/php-pdo/index.php");
+  $insertVille->closeCursor();
   
 ?> 
 
