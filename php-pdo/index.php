@@ -22,10 +22,12 @@
     $result = $bdd->query('SELECT * FROM meteo');
       // $donnees = $result->fetch();
       // print_r($donnees);
-     
+    echo '<form action="" method="POST">';
       echo '<table border="1">';
       echo '<thead>';
         echo '<tr>';
+          echo '<th> ';
+          echo '</th>';
           echo '<th> Ville';
           echo '</th>';
           echo '<th> Max';
@@ -38,6 +40,7 @@
       echo '<tbody>';
       while ($donnees = $result->fetch()) {
         echo '<tr>';
+        echo "<td> <input type='checkbox' name='deleteId[]' value='checkbox'></td>";       
         echo "<td>{$donnees['ville']}</td>";
         echo "<td>{$donnees['haut']}</td>";
         echo "<td>{$donnees['bas']}</td>" ;
@@ -45,9 +48,17 @@
       }
       echo '</tbody>';
       echo '</table>';
+      echo '<input type="submit" name="submit" value="Supprimer les villes"';
+    echo '</form>';
     
-    $result->closeCursor();
-       
+    if(isset($_POST['deleteId'])){
+        foreach($_POST['deleteId'] as $value) {
+          echo "Ville coisie : ".$value.'<br/>';
+        }
+        // $sql = 'DELETE FROM meteo WHERE id IN ('.implode(',', $_POST['deleteId']).')';
+      } else echo "Non";
+    
+     $result->closeCursor();
   ?>
 
 <h2>Ajouter d'autres villes</h2>
@@ -79,5 +90,6 @@
   // header("Location:/sql/php-pdo/index.php");
   
 ?> 
+
 </body>
 </html>
