@@ -1,3 +1,11 @@
+<?php
+try {
+  // Connexion à MySQL
+  $bd = new PDO('mysql:host=localhost;dbname=becode;charset=utf8', 'root', '');
+} catch (Exception $e) {
+  die('Erreur : ' . $e->getMessage());
+}
+?>
 <!DOCTYPE html>
 <html>
 <head>
@@ -6,7 +14,7 @@
 	<link rel="stylesheet" href="css/basics.css" media="screen" title="no title" charset="utf-8">
 </head>
 <body>
-	<a href="/php-pdo/read.php">Liste des données</a>
+	<a href="read.php">Liste des données</a>
 	<h1>Ajouter</h1>
 	<form action="" method="post">
 		<div>
@@ -39,5 +47,27 @@
 		</div>
 		<button type="submit" name="button">Envoyer</button>
 	</form>
+<?php
+	//Récupération des infos
+
+	$name = isset($_POST['name']) ? $_POST['name'] : NULL;
+	$difficulty = isset($_POST['difficulty']) ? $_POST['difficulty'] : NULL;
+	$distance = isset($_POST['distance']) ? $_POST['distance'] : NULL;
+	$duration = isset($_POST['duration']) ? $_POST['duration'] : NULL;
+	$height_difference = isset($_POST['height_difference']) ? $_POST['height_difference'] : NULL;
+
+	//requête préparée
+	$add_randonné = $bd->prepare("INSERT INTO hiking(name, difficulty, distance, duration, height_difference) VALUES (:name, :difficulty, :distance, :duration, :height_difference)");
+
+	$add_randonné->execute([
+		'name' => $name,
+		'difficulty' => $difficulty,
+		'distance' => $distance,
+		'duration' => $duration,
+		'height_difference' => $height_difference,
+  ]);
+
+  $add_randonné->closeCursor();
+?>
 </body>
 </html>
