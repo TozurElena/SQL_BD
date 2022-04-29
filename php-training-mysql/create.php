@@ -66,7 +66,10 @@ try {
 		'duration' => $duration,
 		'height_difference' => $height_difference,
   ]);
-
+	// requete bien ajouté
+		if($_SERVER['REQUEST_METHOD'] == 'POST') {
+			echo '<p>La randonnée a bien été ajoutée avec succès !</p>';
+		}
   $add_randonné->closeCursor();
 ?>
 </body>
